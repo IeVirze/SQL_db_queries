@@ -66,6 +66,38 @@ def create_db():
                    FOREIGN KEY (product_id) REFERENCES dim_product(id)
                    )
     ''') # Customer id should be FOREIGN KEY (customer_id) REFERNECES dim_customer(id) as it would allow application data matching to real people
-
+    print("DB createde")
     return conn, cursor
+
+#Populate country table with sample data
+def populate_countries(cursor):
+    
+    #insertable countries
+    countries = [
+        ('SE', 'Sweden', 'Europe', 'SWD'),
+        ('UK', 'United Kingdom', 'Europe', 'UK'),
+        ('DE', 'Germany', 'Europe', 'GER'),
+        ('FR', 'France', 'Europe', 'FRA'),
+        ('ES', 'Spain', 'Europe', 'ESP'),
+        ('IT', 'Italy', 'Europe', 'ITA'),
+        ('CA', 'Canada', 'North America', 'CAN'),
+        ('NL', 'Netherlands', 'Europe', 'NLD'),
+        ('NO', 'Norway', 'Europe', 'NOR'),
+        ('LV', 'Latvia', 'Europe', 'LAT'),
+        ('EE', 'Estonia', 'Eurpoe', 'EST'),
+        ('LT', 'Lithuania', 'Europe', 'LIT'), 
+        ('PL', 'Poland', 'Europe', 'POL'), 
+        ('DK', 'Denmark', 'Europe', 'DNK')
+    ]
+
+    #query to populate countries table
+    cursor.executemany(''' 
+        INSERT INTO dim_countries (country_code, country_name, region_name, short_name)
+        VALUES (?, ?, ?, ?)
+    ''', countries)
+
+
+
+print('test statement')
+
 
