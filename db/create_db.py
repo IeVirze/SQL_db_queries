@@ -12,9 +12,11 @@ def create_db():
 
     #drop tables if exist
     cursor.execute('DROP TABLE IF EXISTS dim_application')
-    cursor.execute('DROP TABLE IF EXISTS dim_countries')
-    cursor.execute('DROP TABLE IF EXISTS dim_channel')
     cursor.execute('DROP TABLE IF EXISTS dim_product')
+    cursor.execute('DROP TABLE IF EXISTS dim_channel')
+    cursor.execute('DROP TABLE IF EXISTS dim_countries')
+
+
 
     #create tables - SQL with datatypes more universally used; SQLite will convert to one of 5 affinities
     #Create dim_application table
@@ -41,15 +43,15 @@ def create_db():
     ''')
 
     #Create dim_product table
-    # cursor.execute(''' 
-    #     CREATE TABLE dim_product (
-    #                id INTEGER PRIMARY KEY AUTOINCREMENT, 
-    #                product_full_name TEXT, 
-    #                product_short_name TEXT
-    #                country_id INTEGER,
-    #                FOREIGN KEY (country_id) REFERENCES dim_countries(id)
-    #                )
-    # ''')
+    cursor.execute('''
+        CREATE TABLE dim_products (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                   product_full_name TEXT, 
+                   product_short_name TEXT,
+                   country_id INTEGER,
+                   FOREIGN KEY (country_id) REFERENCES dim_countries(id)
+                    )
+    ''')
 
     # Create dim_application table
     # cursor.execute('''
@@ -92,10 +94,9 @@ def populate_countries(cursor):
     ]
 
     #query to populate countries table
-    cursor.executemany(''' 
-        INSERT INTO dim_countries (country_code, country_name, region_name, short_name)
-        VALUES (?, ?, ?, ?)
-    ''', countries)
+    cursor.executemany("INSERT INTO dim_countries (country_code, country_name, region_name, short_name) VALUES (?, ?, ?, ?)", countries)
+
+    print('countries added')
 
 #populate channel table with sample data
 def populate_channels(cursor):
@@ -170,8 +171,53 @@ def populate_channels(cursor):
         INSERT INTO dim_channel (campaign_code, channel_group, channel_name, country_id)
         VALUES (?, ?, ?, ?)
     ''', channels)
+    
+    print('channels added')
 
+
+def populate_products(cursor):
+    #Get country Ids
+    cursor.execute('SELECT id FROM dim_countries')
+    countries = cursor.fetchall()
+
+    product_types = [
+        ('Personal Loan - Standard', 'Personal Loan'),
+        ('Personal Loan - Premium', 'Premium Personal'),
+        ('Auto Loan - New Vehicle', 'Auto New'),
+        ('Auto Loan - Used Vehicle', 'Auto Used'),
+        ('Home Improvement Loan', 'Home Improve'),
+        ('Debt Consolidation Loan', 'Debt Consol'),
+        ('Business Loan - Startup', 'Business Start'),
+        ('Business Loan - Expansion', 'Business Expand'),
+        ('Student Loan', 'Student'),
+        ('Medical Loan', 'Medical'),
+        ('Green Energy Loan', 'Green Energy'),
+        ('Quick Cash Loan', 'Quick Cash')
+    ]
              
+    products = []
+
+    for (country_id,) in countries:
+
+        #Each country has slighly different subset of products
+        num_products = random.randint(5, 10)
+        selected_products = random.sample(product_types, num_products)
+
+        for full_name, short_name in selected_products:
+            products.append((
+                country_id,
+                full_name,
+                short_name
+            ))
+
+    cursor.executemany('''
+        INSERT INTO dim_products (country_id, product_full_name, product_short_name)
+        VALUES (?, ?, ?)
+    ''', products)
+
+    print('products added')
+
+
 
 #main function
 def main():
@@ -180,6 +226,8 @@ def main():
     #populate tables
     populate_countries(cursor)
     populate_channels(cursor)
+    populate_products(cursor)
+    
 
 
 
