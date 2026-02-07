@@ -217,7 +217,74 @@ def populate_products(cursor):
 
     print('products added')
 
+def populate_applications(cursor, num_applications):
 
+    #Get all foreign keys
+    cursor.execute('SELECT id FROM dim_channel')
+    channel_ids = [row[0] for row in cursor.fetchall()]
+
+    cursor.execute('SELECT id FROM dim_countries')
+    country_ids = [row(0) for row in cursor.fetchall()]
+
+    cursor.execute('SELECT id FROM dim_products')
+    products = cursor.fetchall()
+
+    #Generate applications over last X years/days/months
+    start_date = datetime.now() - timedelta(days=730) #730 == 2 years
+
+    applications = []
+
+    for i in range(num_applications):
+
+        random_day = random.randint(0, 730)
+        application_date = start_date + timedelta(days=random_day)
+
+        #Random product and country
+        product_id, product_country_id = random.choice(products)
+        country_id = product_country_id
+
+        #Random channel
+        cursor.execute('SELECT id FROM dim_channel WHERE country_id = ?', (country_id))
+        country_channels = cursor.fetchall()
+
+        if country_channels:
+            channle_id = random.choice(country_channels)[0]
+        else:
+            channel_id = random.choice(channel_ids)
+
+        #Generate customer ID
+        cust_id = f"{random.randint(0,999999):06d}"  
+
+        #age of customers, leagal age where applications can be made and paid out
+        age = random.randint(18, 75)
+
+        #Loan amount
+        if age < 25:
+            loan_amount = round(random.uniform(500, 15000), 2)
+        elif age <35:
+            loan_amount = round(random.uniform(5000, 70000), 2)
+        elif age <45:
+            loan_amount = round(random.uniform(4000, 210000), 2)
+        elif age < 50: 
+            loan_amount = round(random.uniform(1000, 100000), 2)
+        else:
+            loan_amount = round(random.uniform(500, 20000), 2)
+
+        applications.append((
+            channel_id, 
+            country_id, 
+            product_id, 
+            cust_id, 
+            application_date.strftime('%Y-%m-%d'),
+            age,
+            loan_amount
+        ))
+
+    cursor.executemany(''''
+        INSERT INTO dim_applications (channel_id, country_id, product_id, customer_id, date, age_at_application, loan_amount)
+        VALUES(?, ?, ?, ?, ?, ?, ?)                       
+        ''', applications)
+    
 
 #main function
 def main():
@@ -226,6 +293,7 @@ def main():
     #populate tables
     populate_countries(cursor)
     populate_channels(cursor)
+    populate_products(cursor)
     populate_products(cursor)
     
 
