@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 def create_db(): 
     
     #Connect to or create DB
-    conn = sqlite3.connect('loans.db')
+    conn = sqlite3.connect('db/loans.db')
     cursor = conn.cursor()
 
     #drop tables if exist
@@ -285,31 +285,3 @@ def populate_applications(cursor, num_applications):
         VALUES(?, ?, ?, ?, ?, ?, ?)                       
         ''', applications)
     
-
-#main function
-def main():
-    conn, cursor = create_db()
-
-    #populate tables
-    populate_countries(cursor)
-    populate_channels(cursor)
-    populate_products(cursor)
-    populate_applications(cursor, 5000)
-    
-
-
-
-    #comit changes
-    conn.commit()
-
-    #close connection
-    conn.close()
-
-    print('db created, connection closed')
-
-
-
-print('test statement')
-
-if __name__ == "__main__":
-    main()
