@@ -54,21 +54,21 @@ def create_db():
     ''')
 
     # Create dim_application table
-    # cursor.execute('''
-    #     CREATE TABLE dim_application(
-    #                id INTEGER PRIMARY KEY AUTOINCREMENT,
-    #                age_at_application INTEGER,
-    #                channel_id INTEGER, 
-    #                country_id INTEGER,
-    #                customer_id INTEGER, 
-    #                date DATE NOT NULL,
-    #                loan_amount REAL, 
-    #                product_id INTEGER,
-    #                FOREIGN KEY (country_id) REFERENCES dim_country(id),
-    #                FOREIGN KEY (channel_id) REFERENCES dim_channel(id),
-    #                FOREIGN KEY (product_id) REFERENCES dim_product(id)
-    #                )
-    # ''') # Customer id should be FOREIGN KEY (customer_id) REFERNECES dim_customer(id) as it would allow application data matching to real people
+    cursor.execute('''
+        CREATE TABLE dim_applications(
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   age_at_application INTEGER,
+                   channel_id INTEGER, 
+                   country_id INTEGER,
+                   customer_id INTEGER, 
+                   date DATE NOT NULL,
+                   loan_amount REAL, 
+                   product_id INTEGER,
+                   FOREIGN KEY (country_id) REFERENCES dim_country(id),
+                   FOREIGN KEY (channel_id) REFERENCES dim_channel(id),
+                   FOREIGN KEY (product_id) REFERENCES dim_product(id)
+                   )
+    ''') # Customer id should be FOREIGN KEY (customer_id) REFERNECES dim_customer(id) as it would allow application data matching to real people
     print("DB createde")
     return conn, cursor
 
@@ -128,7 +128,7 @@ def populate_channels(cursor):
         for i in range(random.randint(6, 19)): # 6 - 19 channels per country
             channel_group = random.choice(channel_groups)
 
-            print(channel_groups)
+            #print(channel_groups)
 
             if channel_groups == 'Email':
                 channel_name = 'email'
@@ -224,9 +224,9 @@ def populate_applications(cursor, num_applications):
     channel_ids = [row[0] for row in cursor.fetchall()]
 
     cursor.execute('SELECT id FROM dim_countries')
-    country_ids = [row(0) for row in cursor.fetchall()]
+    country_ids = [row[0] for row in cursor.fetchall()]
 
-    cursor.execute('SELECT id FROM dim_products')
+    cursor.execute('SELECT id, country_id FROM dim_products')
     products = cursor.fetchall()
 
     #Generate applications over last X years/days/months
@@ -244,11 +244,11 @@ def populate_applications(cursor, num_applications):
         country_id = product_country_id
 
         #Random channel
-        cursor.execute('SELECT id FROM dim_channel WHERE country_id = ?', (country_id))
+        cursor.execute('SELECT id FROM dim_channel WHERE country_id = ?', (country_id,))
         country_channels = cursor.fetchall()
 
         if country_channels:
-            channle_id = random.choice(country_channels)[0]
+            channel_id = random.choice(country_channels)[0]
         else:
             channel_id = random.choice(channel_ids)
 
@@ -280,7 +280,7 @@ def populate_applications(cursor, num_applications):
             loan_amount
         ))
 
-    cursor.executemany(''''
+    cursor.executemany('''
         INSERT INTO dim_applications (channel_id, country_id, product_id, customer_id, date, age_at_application, loan_amount)
         VALUES(?, ?, ?, ?, ?, ?, ?)                       
         ''', applications)
@@ -294,7 +294,7 @@ def main():
     populate_countries(cursor)
     populate_channels(cursor)
     populate_products(cursor)
-    populate_products(cursor)
+    populate_applications(cursor, 5000)
     
 
 
