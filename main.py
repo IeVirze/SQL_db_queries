@@ -13,7 +13,7 @@ def main():
     populate_countries(cursor)
     populate_channels(cursor)
     populate_products(cursor)
-    populate_applications(cursor, 5000)
+    populate_applications(cursor, 10000)
 
     #comit changes
     conn.commit()

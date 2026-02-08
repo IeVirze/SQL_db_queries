@@ -1,6 +1,6 @@
 import sqlite3
 
-conn = sqlite3.connect("loans.db")
+conn = sqlite3.connect("db/loans.db")
 cursor = conn.cursor()
 
 # Get all table names
