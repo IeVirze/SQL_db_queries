@@ -1,9 +1,8 @@
 import sqlite3
-import os
 import pandas as pd
 
 db_path = 'db/loans.db'
-sql_path = 'quaries.sql'
+sql_path = 'SQL/quaries.sql' #add alternative paths to other sql files in the SQL folder
 
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
