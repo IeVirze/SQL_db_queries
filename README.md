@@ -6,6 +6,7 @@ This is sample data database created with Python SQLite3 from a database relatio
 
 Database has been built based on the following schema:
 
+[DB relational table schema](misc/Improved%20DB%20relations.png)
 
 Database currently consist of 4 tables:
 * dtm_applications - contain product application data and foreign keys to other tables
